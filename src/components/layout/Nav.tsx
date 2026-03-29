@@ -1,10 +1,11 @@
-import { scrollToSection } from '../../utils/scrollTo'
+import { NavLink } from 'react-router-dom'
 
 const NAV_LINKS = [
-  { href: '#projects', label: 'Islands' },
-  { href: '#case-studies', label: 'Shells' },
-  { href: '#about', label: 'Cove' },
-  { href: '#contact', label: 'Bottle' },
+  { to: '/', label: 'Home' },
+  { to: '/about', label: 'About' },
+  { to: '/projects', label: 'Projects' },
+  { to: '/blogs', label: 'Blogs' },
+  { to: '/contact', label: 'Contact' },
 ]
 
 interface NavProps {
@@ -12,22 +13,21 @@ interface NavProps {
 }
 
 export default function Nav({ hidden }: NavProps) {
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault()
-    scrollToSection(href)
-  }
-
   return (
     <nav className={hidden ? 'hidden' : ''}>
-      <a href="#hero" className="nav-logo" onClick={e => handleClick(e, '#hero')}>
-        OCEANA
-      </a>
+      <NavLink to="/" className="nav-logo">
+        prudhvi.
+      </NavLink>
       <ul className="nav-links">
-        {NAV_LINKS.map(({ href, label }) => (
-          <li key={href}>
-            <a href={href} onClick={e => handleClick(e, href)}>
+        {NAV_LINKS.map(({ to, label }) => (
+          <li key={to}>
+            <NavLink
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) => (isActive ? 'active' : '')}
+            >
               {label}
-            </a>
+            </NavLink>
           </li>
         ))}
       </ul>

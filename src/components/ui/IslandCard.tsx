@@ -19,6 +19,7 @@ export default function IslandCard({ project }: IslandCardProps) {
       <span className="card-tag">{project.tag}</span>
       <h3 className="card-title">{project.title}</h3>
       <p className="card-desc">{project.description}</p>
+      {project.role && <p className="card-role">{project.role}</p>}
       <a href="#" className="card-link">
         Explore island{' '}
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">

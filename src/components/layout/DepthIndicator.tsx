@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import { scrollToSection } from '../../utils/scrollTo'
 
-const SECTION_IDS = ['hero', 'projects', 'case-studies', 'about', 'contact']
+const SECTION_IDS = ['hero', 'featured-work', 'what-i-do', 'experience', 'philosophy', 'home-cta']
 
 interface DepthIndicatorProps {
   activeSection: number

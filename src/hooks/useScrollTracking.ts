@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-const TOTAL_SECTIONS = 5
-
-export function useScrollTracking() {
+export function useScrollTracking(totalSections = 6) {
   const [navHidden, setNavHidden] = useState(false)
   const [activeSection, setActiveSection] = useState(0)
   const lastScrollRef = useRef(0)
@@ -32,7 +30,7 @@ export function useScrollTracking() {
 
       // Active depth dot
       const progress = scrollY / (docHeight - windowHeight)
-      const active = Math.min(Math.floor(progress * TOTAL_SECTIONS), TOTAL_SECTIONS - 1)
+      const active = Math.min(Math.floor(progress * totalSections), totalSections - 1)
       setActiveSection(active)
     }
 
@@ -41,7 +39,7 @@ export function useScrollTracking() {
       window.removeEventListener('scroll', handleScroll)
       clearTimeout(navTimeoutRef.current)
     }
-  }, [])
+  }, [totalSections])
 
   return { navHidden, activeSection }
 }

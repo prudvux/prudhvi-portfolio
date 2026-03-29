@@ -2,39 +2,43 @@ import type { Project } from '../types'
 
 export const projects: Project[] = [
   {
-    id: 'tidal',
-    emoji: '🏝️',
-    tag: 'Mobile App',
-    title: 'Tidal — Meditation Companion',
+    id: 'wellsky',
+    emoji: '🏥',
+    tag: 'Enterprise UX',
+    title: 'WellSky HSS Modernization',
     description:
-      'A breathing and mindfulness app that syncs with ocean rhythms. Designed for calm, built for daily ritual.',
+      'Leading UX for large-scale healthcare system transformation — simplifying complex workflows for clinical and operational users.',
+    role: 'UX Strategy · Team Leadership · Stakeholder Collaboration',
     delay: 0,
   },
   {
-    id: 'drift',
-    emoji: '🌊',
-    tag: 'Web Platform',
-    title: 'Drift — Remote Work Hub',
+    id: 'agenticux',
+    emoji: '🤖',
+    tag: 'AI Product',
+    title: 'AgenticUX',
     description:
-      'Reimagining how distributed teams stay connected. A fluid workspace that adapts to your flow.',
+      'Designing AI-driven UX workflows for end-to-end design automation — bridging prompt engineering and human-centered design.',
+    role: 'AI Research · Prompt Engineering · UX Design',
     delay: 150,
   },
   {
-    id: 'pearl',
-    emoji: '🐚',
-    tag: 'Brand & UX',
-    title: 'Pearl — Luxury Skincare',
+    id: 'devzery',
+    emoji: '💻',
+    tag: 'Product Design',
+    title: 'Devzery Platform',
     description:
-      'An e-commerce experience as refined as the products it showcases. Every pixel, intentional.',
+      'End-to-end product design improving developer engagement and traffic growth through intuitive tooling and clear information architecture.',
+    role: 'Product Design · UX Research · Visual Design',
     delay: 300,
   },
   {
-    id: 'anchor',
-    emoji: '⚓',
-    tag: 'Design System',
-    title: 'Anchor — Component Library',
+    id: 'nobletix',
+    emoji: '🎗️',
+    tag: 'Social Impact',
+    title: 'Nobletix App',
     description:
-      'A comprehensive design system built for scale. Consistent, accessible, and endlessly composable.',
+      'A social impact platform connecting people to events and donation causes — designed to make giving feel effortless and personal.',
+    role: 'UX Design · Product Strategy · Mobile Design',
     delay: 450,
   },
 ]

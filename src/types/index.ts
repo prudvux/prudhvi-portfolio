@@ -4,6 +4,7 @@ export interface Project {
   tag: string
   title: string
   description: string
+  role: string
   delay: number
 }
 
@@ -21,10 +22,17 @@ export interface CaseStudy {
   description: string
 }
 
+export interface Experience {
+  id: string
+  role: string
+  company: string
+}
+
 export type ZoneTransitionVariant =
   | 'shore-to-shallow'
   | 'shallow-to-deep'
   | 'deep-to-cove'
   | 'cove-to-contact'
+  | 'surface-to-light'
 
-export type SectionId = 'hero' | 'projects' | 'case-studies' | 'about' | 'contact'
+export type SectionId = 'hero' | 'featured-work' | 'what-i-do' | 'experience' | 'philosophy' | 'home-cta'

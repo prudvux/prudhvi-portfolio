@@ -1,51 +1,49 @@
 import { useEffect, useRef } from 'react'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface Node {
   id: number
   label: string
-  x: number; y: number
-  vx: number; vy: number
-  // target position for convergence
-  tx: number; ty: number
-  // float origin (idle drift center)
-  ox: number; oy: number
-  // float phase offset
-  phase: number
-  phaseY: number
+  x: number
+  y: number
+  vx: number
+  vy: number
+  // base radius + pulse
+  baseR: number
   r: number
-  color: string
-  glowColor: string
+  pulsePhase: number
+  pulseSpeed: number
+  pulseAmp: number
+  // color cycling
+  colorPhase: number
+  colorSpeed: number
   hovered: boolean
-  // 0 = floating, 1 = converged
-  convergeT: number
 }
 
 const NODES_DEF = [
-  { label: 'Design',      color: '168,204,224', glow: '168,204,224' },
-  { label: 'Engineering', color: '184,216,208', glow: '184,216,208' },
-  { label: 'Product',     color: '168,204,224', glow: '212,165,154' },
-  { label: 'Research',    color: '184,216,208', glow: '184,216,208' },
-  { label: 'AI',          color: '212,165,154', glow: '212,165,154' },
+  'Design',
+  'Engineering',
+  'Product',
+  'Research',
+  'AI',
 ]
 
-// Phase thresholds in ms
-const PHASE1_END   = 2000
-const PHASE2_END   = 5000
-const PHASE3_END   = 8000
+// Colors visible on the light white→mist→sky-blue hero gradient
+const COLOR_PALETTE = [
+  { fill: '58,107,130',   glow: '58,107,130'   },  // --ocean
+  { fill: '91,143,168',   glow: '91,143,168'   },  // --deep-blue
+  { fill: '30,58,74',     glow: '58,107,130'   },  // --abyss
+  { fill: '58,107,130',   glow: '184,216,208'  },  // ocean w/ seafoam glow
+  { fill: '91,143,168',   glow: '168,204,224'  },  // deep-blue w/ sky glow
+]
 
-function easeInOut(t: number) {
-  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-}
-
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t
-}
+// Exclusion ellipse — keeps nodes away from the hero text
+const EXCL_RX_FRAC = 0.30
+const EXCL_RY_FRAC = 0.26
 
 export default function NodeCanvas() {
-  const canvasRef  = useRef<HTMLCanvasElement>(null)
-  const mouseRef   = useRef({ x: -999, y: -999 })
-  const nodesRef   = useRef<Node[]>([])
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const mouseRef  = useRef({ x: -999, y: -999 })
+  const nodesRef  = useRef<Node[]>([])
 
   useEffect(() => {
     const canvas = canvasRef.current!
@@ -57,38 +55,45 @@ export default function NodeCanvas() {
       initNodes()
     }
 
+    function randomPerimeterPos(w: number, h: number, cx: number, cy: number, exRx: number, exRy: number) {
+      // Keep trying random positions until one lands outside exclusion zone
+      let x = 0, y = 0
+      for (let attempt = 0; attempt < 40; attempt++) {
+        x = 60 + Math.random() * (w - 120)
+        y = 60 + Math.random() * (h - 120)
+        const dx = (x - cx) / exRx
+        const dy = (y - cy) / exRy
+        if (dx * dx + dy * dy > 1.1) break
+      }
+      return { x, y }
+    }
+
     function initNodes() {
-      const w = canvas.width
-      const h = canvas.height
+      const w   = canvas.width
+      const h   = canvas.height
+      const cx  = w / 2
+      const cy  = h / 2
+      const exRx = w * EXCL_RX_FRAC + 60
+      const exRy = h * EXCL_RY_FRAC + 50
 
-      // Final wave-path positions — a gentle S-curve across center
-      const waveTargets = NODES_DEF.map((_, i) => {
-        const t  = i / (NODES_DEF.length - 1)
-        const tx = w * 0.15 + t * w * 0.7
-        const ty = h * 0.5 + Math.sin(t * Math.PI) * h * 0.15
-        return { tx, ty }
-      })
-
-      nodesRef.current = NODES_DEF.map((def, i) => {
-        const ox = w * 0.1 + Math.random() * w * 0.8
-        const oy = h * 0.15 + Math.random() * h * 0.7
+      nodesRef.current = NODES_DEF.map((label, i) => {
+        const pos = randomPerimeterPos(w, h, cx, cy, exRx, exRy)
+        const baseR = 22 + Math.random() * 16
         return {
-          id:         i,
-          label:      def.label,
-          x:          ox,
-          y:          oy,
-          vx:         (Math.random() - 0.5) * 0.4,
-          vy:         (Math.random() - 0.5) * 0.4,
-          tx:         waveTargets[i]!.tx,
-          ty:         waveTargets[i]!.ty,
-          ox, oy,
-          phase:      Math.random() * Math.PI * 2,
-          phaseY:     Math.random() * Math.PI * 2,
-          r:          28 + Math.random() * 10,
-          color:      def.color,
-          glowColor:  def.glow,
-          hovered:    false,
-          convergeT:  0,
+          id:          i,
+          label,
+          x:           pos.x,
+          y:           pos.y,
+          vx:          (Math.random() - 0.5) * 0.7,
+          vy:          (Math.random() - 0.5) * 0.7,
+          baseR,
+          r:           baseR,
+          pulsePhase:  Math.random() * Math.PI * 2,
+          pulseSpeed:  0.4 + Math.random() * 0.6,
+          pulseAmp:    8 + Math.random() * 10,
+          colorPhase:  Math.random() * Math.PI * 2,
+          colorSpeed:  0.15 + Math.random() * 0.2,
+          hovered:     false,
         }
       })
     }
@@ -96,224 +101,183 @@ export default function NodeCanvas() {
     resize()
     window.addEventListener('resize', resize)
 
-    const startTime = performance.now()
     let rafId: number
+    const startTime = performance.now()
 
-    // ── Hit test ──────────────────────────────────────────────────────────────
     function hitTest(n: Node, mx: number, my: number) {
       const dx = n.x - mx
       const dy = n.y - my
-      return Math.sqrt(dx * dx + dy * dy) < n.r + 18
+      return Math.sqrt(dx * dx + dy * dy) < n.r + 16
     }
 
-    // ── Draw one node ──────────────────────────────────────────────────────────
-    function drawNode(n: Node, phase: number, alpha: number) {
-      const blurRadius = n.hovered ? 0 : lerp(8, 0, Math.min(1, (phase - PHASE1_END) / (PHASE2_END - PHASE1_END)))
+    function getColor(n: Node, t: number) {
+      // Blend between two adjacent palette entries
+      const total  = COLOR_PALETTE.length
+      const cycle  = (n.colorPhase + t * n.colorSpeed) % (Math.PI * 2)
+      const raw    = (cycle / (Math.PI * 2)) * total
+      const idxA   = Math.floor(raw) % total
+      const idxB   = (idxA + 1) % total
+      const blend  = raw - Math.floor(raw)
 
+      const a = COLOR_PALETTE[idxA]!
+      const b = COLOR_PALETTE[idxB]!
+
+      // Parse and interpolate RGB
+      const [ar, ag, ab2] = a.fill.split(',').map(Number) as [number, number, number]
+      const [br, bg, bb]  = b.fill.split(',').map(Number) as [number, number, number]
+      const r = Math.round(ar + (br - ar) * blend)
+      const g = Math.round(ag + (bg - ag) * blend)
+      const bl = Math.round(ab2 + (bb - ab2) * blend)
+
+      const [gr, gg, gb] = a.glow.split(',').map(Number) as [number, number, number]
+      const [gr2, gg2, gb2] = b.glow.split(',').map(Number) as [number, number, number]
+      const glr = Math.round(gr + (gr2 - gr) * blend)
+      const glg = Math.round(gg + (gg2 - gg) * blend)
+      const glb = Math.round(gb + (gb2 - gb) * blend)
+
+      return { fill: `${r},${g},${bl}`, glow: `${glr},${glg},${glb}` }
+    }
+
+    function drawNode(n: Node, color: { fill: string; glow: string }) {
       ctx.save()
 
-      // Glow
-      const glowSize  = n.hovered ? n.r * 2.5 : n.r * 1.8
-      const glowAlpha = (n.hovered ? 0.35 : 0.18) * alpha
-      const gGrad     = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowSize)
-      gGrad.addColorStop(0,   `rgba(${n.glowColor},${glowAlpha})`)
-      gGrad.addColorStop(0.5, `rgba(${n.glowColor},${glowAlpha * 0.3})`)
-      gGrad.addColorStop(1,   `rgba(${n.glowColor},0)`)
+      // Outer glow
+      const glowR = n.hovered ? n.r * 2.8 : n.r * 2.2
+      const glowA = n.hovered ? 0.32 : 0.18
+      const gGrad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR)
+      gGrad.addColorStop(0,   `rgba(${color.glow},${glowA})`)
+      gGrad.addColorStop(0.5, `rgba(${color.glow},${glowA * 0.3})`)
+      gGrad.addColorStop(1,   `rgba(${color.glow},0)`)
       ctx.fillStyle = gGrad
       ctx.beginPath()
-      ctx.arc(n.x, n.y, glowSize, 0, Math.PI * 2)
+      ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2)
       ctx.fill()
 
-      // Blur filter for phase 1
-      if (blurRadius > 0.5) ctx.filter = `blur(${blurRadius}px)`
-
-      // Node circle
+      // Node body — glass-like with radial gradient
       const nodeGrad = ctx.createRadialGradient(
-        n.x - n.r * 0.28, n.y - n.r * 0.28, 0,
+        n.x - n.r * 0.3, n.y - n.r * 0.3, 0,
         n.x, n.y, n.r
       )
-      const baseAlpha = n.hovered ? 0.9 : 0.55
-      nodeGrad.addColorStop(0,   `rgba(255,255,255,${baseAlpha * alpha})`)
-      nodeGrad.addColorStop(0.4, `rgba(${n.color},${(baseAlpha * 0.65) * alpha})`)
-      nodeGrad.addColorStop(1,   `rgba(${n.color},${(baseAlpha * 0.3) * alpha})`)
-
+      const ba = n.hovered ? 0.85 : 0.62
+      nodeGrad.addColorStop(0,   `rgba(255,255,255,${ba * 0.9})`)
+      nodeGrad.addColorStop(0.35, `rgba(${color.fill},${ba * 0.7})`)
+      nodeGrad.addColorStop(1,   `rgba(${color.fill},${ba * 0.4})`)
       ctx.beginPath()
       ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2)
       ctx.fillStyle = nodeGrad
       ctx.fill()
 
-      // Border
-      ctx.strokeStyle = `rgba(${n.color},${(n.hovered ? 0.8 : 0.35) * alpha})`
-      ctx.lineWidth   = n.hovered ? 1.5 : 0.8
+      // Border ring
+      ctx.strokeStyle = `rgba(${color.fill},${n.hovered ? 0.8 : 0.45})`
+      ctx.lineWidth   = n.hovered ? 1.8 : 1
       ctx.stroke()
 
-      ctx.filter = 'none'
       ctx.restore()
 
-      // Label — show on hover always, fade in during phase 2+
-      const labelAlpha = n.hovered
-        ? 1
-        : Math.max(0, (phase - PHASE2_END) / (PHASE3_END - PHASE2_END)) * 0.65
-
-      if (labelAlpha > 0.02) {
-        ctx.save()
-        ctx.globalAlpha = labelAlpha * alpha
-        ctx.font        = `${n.hovered ? 600 : 400} ${n.hovered ? '13px' : '11px'} 'Questrial', sans-serif`
-        ctx.fillStyle   = n.hovered ? `rgba(30,58,74,0.95)` : `rgba(30,58,74,0.7)`
-        ctx.textAlign   = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText(n.label, n.x, n.y)
-        ctx.restore()
-      }
+      // Label
+      ctx.save()
+      ctx.globalAlpha  = n.hovered ? 1 : 0.8
+      ctx.font         = `${n.hovered ? 600 : 400} ${n.hovered ? '13px' : '11px'} 'Questrial', sans-serif`
+      ctx.fillStyle    = n.hovered ? 'rgba(30,58,74,1)' : 'rgba(30,58,74,0.85)'
+      ctx.textAlign    = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(n.label, n.x, n.y)
+      ctx.restore()
     }
 
-    // ── Draw connection line ───────────────────────────────────────────────────
-    function drawLine(a: Node, b: Node, alpha: number) {
-      const dx   = b.x - a.x
-      const dy   = b.y - a.y
-      const dist = Math.sqrt(dx * dx + dy * dy)
-      if (dist > 420) return
-
-      const strength  = Math.max(0, 1 - dist / 420)
-      const lineAlpha = strength * alpha * 0.6
-
-      const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y)
-      grad.addColorStop(0,   `rgba(${a.color},${lineAlpha})`)
-      grad.addColorStop(0.5, `rgba(168,204,224,${lineAlpha * 0.7})`)
-      grad.addColorStop(1,   `rgba(${b.color},${lineAlpha})`)
-
-      ctx.beginPath()
-      ctx.moveTo(a.x, a.y)
-      ctx.lineTo(b.x, b.y)
-      ctx.strokeStyle = grad
-      ctx.lineWidth   = strength * (a.hovered || b.hovered ? 1.8 : 1)
-      ctx.stroke()
-    }
-
-    // ── Draw final wave path ───────────────────────────────────────────────────
-    function drawWavePath(nodes: Node[], alpha: number) {
-      if (nodes.length < 2) return
-      ctx.beginPath()
-      ctx.moveTo(nodes[0]!.x, nodes[0]!.y)
-      for (let i = 1; i < nodes.length; i++) {
-        const prev = nodes[i - 1]!
-        const curr = nodes[i]!
-        const mx   = (prev.x + curr.x) / 2
-        const my   = (prev.y + curr.y) / 2
-        ctx.quadraticCurveTo(prev.x, prev.y, mx, my)
-      }
-      const last = nodes[nodes.length - 1]!
-      ctx.lineTo(last.x, last.y)
-
-      const grad = ctx.createLinearGradient(nodes[0]!.x, 0, last.x, 0)
-      grad.addColorStop(0,   `rgba(168,204,224,${alpha * 0.55})`)
-      grad.addColorStop(0.4, `rgba(184,216,208,${alpha * 0.45})`)
-      grad.addColorStop(0.7, `rgba(168,204,224,${alpha * 0.5})`)
-      grad.addColorStop(1,   `rgba(212,165,154,${alpha * 0.4})`)
-
-      ctx.strokeStyle = grad
-      ctx.lineWidth   = 1.5
-      ctx.stroke()
-    }
-
-    // ── Main loop ─────────────────────────────────────────────────────────────
     function draw() {
-      const now     = performance.now()
-      const elapsed = now - startTime
-      const w       = canvas.width
-      const h       = canvas.height
-      const t       = elapsed / 1000
-      const mx      = mouseRef.current.x
-      const my      = mouseRef.current.y
-      const nodes   = nodesRef.current
+      const now = performance.now()
+      const t   = (now - startTime) / 1000
+      const w   = canvas.width
+      const h   = canvas.height
+      const cx  = w / 2
+      const cy  = h / 2
+      const mx  = mouseRef.current.x
+      const my  = mouseRef.current.y
+
+      const exRx = w * EXCL_RX_FRAC + 60
+      const exRy = h * EXCL_RY_FRAC + 50
+      const pad  = 55
 
       ctx.clearRect(0, 0, w, h)
 
-      // ── Update node positions ──────────────────────────────────────────────
+      nodesRef.current.forEach(n => {
 
-      // Convergence progress (0→1 during phase 2→3)
-      const convergeRaw = Math.max(0, Math.min(1,
-        (elapsed - PHASE2_END) / (PHASE3_END - PHASE2_END)
-      ))
-      const converge = easeInOut(convergeRaw)
+        // ── Pulse size ──────────────────────────────────────────────────────
+        n.r = n.baseR + Math.sin(t * n.pulseSpeed + n.pulsePhase) * n.pulseAmp
 
-      // Line alpha: fade in during phase 2
-      const lineAlpha = Math.max(0, Math.min(1,
-        (elapsed - PHASE1_END) / (PHASE2_END - PHASE1_END)
-      ))
+        // ── Random walk — add small Brownian nudge each frame ───────────────
+        n.vx += (Math.random() - 0.5) * 0.12
+        n.vy += (Math.random() - 0.5) * 0.12
 
-      // Wave path alpha: fade in during phase 3
-      const waveAlpha = Math.max(0, Math.min(1,
-        (elapsed - (PHASE2_END + (PHASE3_END - PHASE2_END) * 0.5)) /
-        ((PHASE3_END - PHASE2_END) * 0.5)
-      ))
-
-      nodes.forEach(n => {
-        // Idle float (sinusoidal drift)
-        const floatX = n.ox + Math.sin(t * 0.38 + n.phase)  * 30
-        const floatY = n.oy + Math.cos(t * 0.28 + n.phaseY) * 22
-
-        // Mouse repulsion (gentle)
-        const dx = n.x - mx
-        const dy = n.y - my
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        let pushX = 0, pushY = 0
-        if (dist < 180 && dist > 0) {
-          const force = (180 - dist) / 180 * 18
-          pushX = (dx / dist) * force
-          pushY = (dy / dist) * force
+        // Speed cap
+        const speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy)
+        const maxSpeed = 0.9
+        if (speed > maxSpeed) {
+          n.vx = (n.vx / speed) * maxSpeed
+          n.vy = (n.vy / speed) * maxSpeed
         }
 
-        // Target: lerp between float+push and converge target
-        const targetX = lerp(floatX + pushX, n.tx, converge)
-        const targetY = lerp(floatY + pushY, n.ty, converge)
+        let nx = n.x + n.vx
+        let ny = n.y + n.vy
 
-        n.x += (targetX - n.x) * 0.06
-        n.y += (targetY - n.y) * 0.06
+        // ── Exclusion zone — push node out if inside ellipse ────────────────
+        const dex = (nx - cx) / exRx
+        const dey = (ny - cy) / exRy
+        const ellipseDist = Math.sqrt(dex * dex + dey * dey)
 
-        // Update hover
+        if (ellipseDist < 1.0) {
+          const angle  = Math.atan2((ny - cy) / exRy, (nx - cx) / exRx)
+          const overlap = 1.0 - ellipseDist
+          const force  = overlap * 3.5
+          n.vx += Math.cos(angle) * force
+          n.vy += Math.sin(angle) * force * (exRx / exRy)
+          // Immediately nudge position to boundary
+          nx = cx + Math.cos(angle) * exRx * 1.02
+          ny = cy + Math.sin(angle) * exRy * 1.02
+        }
+
+        // ── Canvas boundary bounce ──────────────────────────────────────────
+        if (nx < pad)     { nx = pad;     n.vx = Math.abs(n.vx) * 0.6 }
+        if (nx > w - pad) { nx = w - pad; n.vx = -Math.abs(n.vx) * 0.6 }
+        if (ny < pad)     { ny = pad;     n.vy = Math.abs(n.vy) * 0.6 }
+        if (ny > h - pad) { ny = h - pad; n.vy = -Math.abs(n.vy) * 0.6 }
+
+        // ── Mouse repulsion ─────────────────────────────────────────────────
+        const mdx   = nx - mx
+        const mdy   = ny - my
+        const mdist = Math.sqrt(mdx * mdx + mdy * mdy)
+        if (mdist < 150 && mdist > 0) {
+          const force = (150 - mdist) / 150 * 2.5
+          n.vx += (mdx / mdist) * force
+          n.vy += (mdy / mdist) * force
+        }
+
+        // Velocity damping so nodes don't accelerate forever
+        n.vx *= 0.97
+        n.vy *= 0.97
+
+        n.x = nx
+        n.y = ny
         n.hovered = hitTest(n, mx, my)
       })
 
-      // ── Draw connections ───────────────────────────────────────────────────
-      if (lineAlpha > 0.01) {
-        ctx.save()
-        for (let i = 0; i < nodes.length; i++) {
-          for (let j = i + 1; j < nodes.length; j++) {
-            drawLine(nodes[i]!, nodes[j]!, lineAlpha)
-          }
-        }
-        ctx.restore()
-      }
-
-      // ── Draw wave path (phase 3) ───────────────────────────────────────────
-      if (waveAlpha > 0.01) {
-        ctx.save()
-        ctx.globalAlpha = waveAlpha
-        const sorted = [...nodes].sort((a, b) => a.x - b.x)
-        drawWavePath(sorted, waveAlpha)
-        ctx.restore()
-      }
-
-      // ── Draw nodes ────────────────────────────────────────────────────────
-      nodes.forEach(n => drawNode(n, elapsed, 1))
+      // Draw nodes — no lines
+      nodesRef.current.forEach(n => {
+        const color = getColor(n, t)
+        drawNode(n, color)
+      })
 
       rafId = requestAnimationFrame(draw)
     }
 
     draw()
 
-    // ── Mouse events ──────────────────────────────────────────────────────────
     const onMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect()
-      mouseRef.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      }
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
     }
-
     const onLeave = () => { mouseRef.current = { x: -999, y: -999 } }
-
     canvas.addEventListener('mousemove', onMove)
     canvas.addEventListener('mouseleave', onLeave)
 

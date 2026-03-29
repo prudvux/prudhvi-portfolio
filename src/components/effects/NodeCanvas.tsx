@@ -27,13 +27,13 @@ const NODES_DEF = [
   'AI',
 ]
 
-// Colors visible on the light white→mist→sky-blue hero gradient
+// Colors from CSS design tokens (globals.css :root)
 const COLOR_PALETTE = [
-  { fill: '58,107,130',   glow: '58,107,130'   },  // --ocean
-  { fill: '91,143,168',   glow: '91,143,168'   },  // --deep-blue
-  { fill: '30,58,74',     glow: '58,107,130'   },  // --abyss
-  { fill: '58,107,130',   glow: '184,216,208'  },  // ocean w/ seafoam glow
-  { fill: '91,143,168',   glow: '168,204,224'  },  // deep-blue w/ sky glow
+  { fill: '184,216,208',  glow: '184,216,208'  },  // --seafoam
+  { fill: '212,165,154',  glow: '212,165,154'  },  // --coral
+  { fill: '168,204,224',  glow: '168,204,224'  },  // --sky-blue
+  { fill: '232,199,191',  glow: '212,165,154'  },  // --shell-pink w/ coral glow
+  { fill: '212,236,230',  glow: '184,216,208'  },  // --seafoam-light w/ seafoam glow
 ]
 
 // Exclusion ellipse — keeps nodes away from the hero text

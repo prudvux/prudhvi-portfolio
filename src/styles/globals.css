@@ -1329,7 +1329,11 @@ footer {
 /* ===== PHILOSOPHY ===== */
 .philosophy {
   background: var(--abyss);
-  padding: 10rem 2rem;
+  padding: 4rem 2rem;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
 }
@@ -2233,7 +2237,7 @@ main > * {
   .projects { padding: 7rem 2rem; }
   .what-i-do { padding: 7rem 2rem; }
   .experience-snapshot { padding: 7rem 2rem; }
-  .philosophy { padding: 8rem 2rem; }
+  .philosophy { padding: 4rem 2rem; }
   .home-cta { padding: 8rem 2rem; }
   .islands-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
   .skills-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2283,7 +2287,7 @@ main > * {
   .projects { padding: 6rem 1.5rem; }
   .what-i-do { padding: 6rem 1.5rem; }
   .experience-snapshot { padding: 6rem 1.5rem; }
-  .philosophy { padding: 7rem 1.5rem; }
+  .philosophy { padding: 3rem 1.5rem; }
   .home-cta { padding: 7rem 1.5rem; min-height: 60vh; }
   .contact { padding: 8rem 1.5rem 6rem; }
   footer { padding: 2rem 1.5rem; }

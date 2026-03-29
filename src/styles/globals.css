@@ -2155,40 +2155,188 @@ main > * {
 
 .splash-skip:hover { color: rgba(255, 255, 255, 0.6); }
 
-/* ===== RESPONSIVE ===== */
+/* ===== NAV — HAMBURGER ===== */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  z-index: 1010;
+}
+
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--abyss);
+  transition: all 0.35s var(--ease-calm);
+  transform-origin: center;
+}
+
+.nav-hamburger.open span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+.nav-hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.nav-hamburger.open span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+.nav-mobile {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(248, 251, 253, 0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(184, 216, 208, 0.3);
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.5rem 1.5rem;
+  animation: mobileNavIn 0.3s var(--ease-calm) both;
+  z-index: 1005;
+}
+
+.nav-mobile a {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--abyss);
+  text-decoration: none;
+  opacity: 0.55;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(184, 216, 208, 0.2);
+  transition: opacity 0.3s var(--ease-calm), color 0.3s var(--ease-calm);
+}
+
+.nav-mobile a:last-child { border-bottom: none; }
+.nav-mobile a:hover,
+.nav-mobile a.active { opacity: 1; color: var(--ocean); }
+
+@keyframes mobileNavIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== RESPONSIVE — TABLET (≤1024px) ===== */
+@media (max-width: 1024px) {
+  nav { padding: 1.8rem 2rem; }
+  .hero-title--nodes { font-size: clamp(2rem, 5vw, 4rem); }
+  .about-hero { padding: 9rem 2rem 5rem; }
+  .projects { padding: 7rem 2rem; }
+  .what-i-do { padding: 7rem 2rem; }
+  .experience-snapshot { padding: 7rem 2rem; }
+  .philosophy { padding: 8rem 2rem; }
+  .home-cta { padding: 8rem 2rem; }
+  .islands-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .skills-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ===== RESPONSIVE — MOBILE (≤768px) ===== */
 @media (max-width: 768px) {
-  nav { padding: 1.5rem; }
+  /* Nav */
+  nav {
+    padding: 1.4rem 1.5rem;
+    position: relative;
+    flex-wrap: wrap;
+  }
   .nav-links { display: none; }
-  .depth-indicator { right: 1rem; }
-  .islands-grid { grid-template-columns: 1fr; gap: 2rem; }
-  .about-content {
-    grid-template-columns: 1fr;
-    gap: 3rem;
+  .nav-hamburger { display: flex; }
+
+  /* Cursor — disable on touch */
+  body { cursor: auto; }
+  .cursor-droplet,
+  .cursor-glow,
+  .cursor-trail-particle { display: none; }
+
+  /* Depth indicator */
+  .depth-indicator { display: none; }
+
+  /* Hero */
+  .hero-text {
+    padding: 0 1.5rem;
     text-align: center;
   }
-  .about-visual { max-width: 250px; margin: 0 auto; }
-  .about-skills { justify-content: center; }
+  .hero-greeting { font-size: 0.62rem; }
+  .hero-title--nodes { font-size: clamp(1.9rem, 8vw, 3rem); }
+  .hero-subtitle {
+    font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+    max-width: 100%;
+  }
+  .hero-ctas {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+  }
+  .hero-cta { width: 100%; max-width: 260px; text-align: center; }
+  /* Disable pointer events on node canvas on touch devices */
+  .node-canvas-wrap { pointer-events: none; }
+
+  /* Section spacing */
+  .projects { padding: 6rem 1.5rem; }
+  .what-i-do { padding: 6rem 1.5rem; }
+  .experience-snapshot { padding: 6rem 1.5rem; }
+  .philosophy { padding: 7rem 1.5rem; }
+  .home-cta { padding: 7rem 1.5rem; min-height: 60vh; }
+  .contact { padding: 8rem 1.5rem 6rem; }
+  footer { padding: 2rem 1.5rem; }
+  .page-top-pad { padding-top: 7rem; }
+  .zone-transition { height: 15vh; }
+
+  /* Section headings */
+  .section-heading { margin-bottom: 3rem; }
+  .section-intro { margin: -1.5rem auto 3rem; }
+
+  /* Grids */
+  .islands-grid { grid-template-columns: 1fr; gap: 1.8rem; }
+  .skills-grid { grid-template-columns: 1fr; gap: 1rem; }
+
+  /* Experience */
+  .experience-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  /* About — The Cove */
   .about-hero { padding: 8rem 1.5rem 4rem; }
   .about-hook { font-size: clamp(2.4rem, 10vw, 3.5rem); }
   .about-narrative { padding: 1rem 1.5rem 4rem; }
   .about-narrative::before { left: 1.5rem; }
   .about-block { padding: 2.5rem 0 2.5rem 3.5rem; }
   .about-closing { padding: 4rem 1.5rem 7rem; }
+
+  /* Case studies / shells */
   .shell-header { padding: 1.5rem; }
   .shell.open .shell-content { padding: 0 1.5rem 1.5rem; }
-  .shell-meta { gap: 1rem; }
-  body { cursor: auto; }
-  .cursor-droplet,
-  .cursor-glow,
-  .cursor-trail-particle { display: none; }
+  .shell-meta { gap: 1rem; flex-wrap: wrap; }
+}
 
-  /* New sections */
-  .skills-grid { grid-template-columns: 1fr; gap: 1rem; }
-  .what-i-do { padding: 6rem 1.5rem; }
-  .experience-snapshot { padding: 6rem 1.5rem; }
-  .experience-item { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
-  .philosophy { padding: 7rem 1.5rem; }
-  .home-cta { padding: 7rem 1.5rem; min-height: 60vh; }
-  .hero-ctas { flex-direction: column; align-items: center; }
-  .hero-cta { width: 100%; max-width: 260px; text-align: center; }
+/* ===== RESPONSIVE — SMALL MOBILE (≤480px) ===== */
+@media (max-width: 480px) {
+  nav { padding: 1.2rem; }
+  .nav-logo { font-size: 1.2rem; }
+
+  .hero-title--nodes { font-size: clamp(1.6rem, 9vw, 2.4rem); }
+  .hero-subtitle { font-size: 0.88rem; line-height: 1.7; }
+  .hero-greeting { letter-spacing: 0.2em; }
+  .hero-cta { padding: 0.85rem 1.8rem; font-size: 0.68rem; }
+
+  .about-hook { font-size: clamp(2rem, 11vw, 3rem); }
+  .about-block { padding: 2rem 0 2rem 3rem; }
+  .about-block-body { font-size: clamp(1rem, 4vw, 1.2rem); }
+
+  .island-card { padding: 2rem; }
+  .skill-card { padding: 1.8rem 1.5rem; }
+
+  .home-cta-btn { padding: 0.9rem 2rem; font-size: 0.68rem; }
+  .contact-content h2 { font-size: clamp(1.6rem, 8vw, 2.2rem); }
+  .section-heading { font-size: clamp(1.8rem, 8vw, 2.5rem); }
 }
